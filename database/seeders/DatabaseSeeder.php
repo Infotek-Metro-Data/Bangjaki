@@ -11,12 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
+    
     public function run(): void
     {
-        // Create Admin
         Pengguna::create([
             'nama' => 'Admin BangJaki',
             'email' => 'admin@bangjaki.com',
@@ -26,7 +23,6 @@ class DatabaseSeeder extends Seeder
             'status' => 'aktif',
         ]);
 
-        // Create Petugas
         $petugas1 = Pengguna::create([
             'nama' => 'Budi Collector',
             'email' => 'budi@bangjaki.com',
@@ -47,7 +43,6 @@ class DatabaseSeeder extends Seeder
             'status' => 'aktif',
         ]);
 
-        // Create Jenis Pelanggan
         $jenisRT = JenisPelanggan::create([
             'nama_paket' => 'Rumah Tangga',
             'harga_dasar' => 50000,
@@ -66,7 +61,6 @@ class DatabaseSeeder extends Seeder
             'deskripsi' => 'Paket premium dengan pengangkutan 2x/minggu',
         ]);
 
-        // Create Pelanggan
         $pelangganData = [
             ['nama' => 'Ahmad Santoso', 'alamat' => 'Jl. Merdeka No. 45, RT 05/RW 02', 'wilayah' => 'Wilayah A', 'jenis' => $jenisRT, 'tanggal' => 15],
             ['nama' => 'Siti Rahayu', 'alamat' => 'Jl. Sudirman No. 12, RT 03/RW 01', 'wilayah' => 'Wilayah A', 'jenis' => $jenisRT, 'tanggal' => 5],
@@ -87,7 +81,6 @@ class DatabaseSeeder extends Seeder
                 'status' => 'aktif',
             ]);
 
-            // Create tagihan for current month
             $tanggalReg = $pelanggan->tanggal_registrasi->day;
             $periodeAwal = now()->setDay($tanggalReg);
             

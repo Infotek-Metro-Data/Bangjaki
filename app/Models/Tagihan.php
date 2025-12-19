@@ -13,15 +13,17 @@ class Tagihan extends Model
 
     protected $fillable = [
         'pelanggan_id',
-        'periode',
-        'jumlah',
-        'tanggal_jatuh_tempo',
+        'periode_mulai',
+        'periode_selesai',
+        'jumlah_tagihan',
+        'jatuh_tempo',
         'status',
-        'denda',
     ];
 
     protected $casts = [
-        'tanggal_jatuh_tempo' => 'date',
+        'periode_mulai' => 'date',
+        'periode_selesai' => 'date',
+        'jatuh_tempo' => 'date',
     ];
 
     public function pelanggan()

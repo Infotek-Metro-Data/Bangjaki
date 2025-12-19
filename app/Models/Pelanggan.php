@@ -8,24 +8,33 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pelanggan extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'pelanggan';
 
     protected $fillable = [
+        'jenis_pelanggan_id',
         'nama',
         'email',
-        'telepon',
-        'alamat',
+        'alamat_lengkap',
         'wilayah',
-        'jenis_pelanggan_id',
-        'tanggal_daftar',
+        'telepon',
+        'latitude',
+        'longitude',
+        'iuran_khusus',
+        'tanggal_registrasi',
         'status',
     ];
 
     protected $casts = [
-        'tanggal_daftar' => 'date',
+        'tanggal_registrasi' => 'date',
+        'iuran_khusus' => 'decimal:2',
     ];
+
+    public function getHargaAttribute()
+    {
+        return $this->iuran_khusus ?? $this->jenisPelanggan?->harga_dasar ?? 0;
+    }
 
     public function jenisPelanggan()
     {

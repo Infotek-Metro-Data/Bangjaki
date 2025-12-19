@@ -5,14 +5,11 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme {
-    /* Font Family */
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-    /* Primary Colors - Green (Eco themed) */
     --color-primary-50: #ecfdf5;
     --color-primary-100: #d1fae5;
     --color-primary-200: #a7f3d0;
@@ -24,7 +21,6 @@
     --color-primary-800: #065f46;
     --color-primary-900: #064e3b;
 
-    /* Secondary Colors - Slate */
     --color-secondary-50: #f8fafc;
     --color-secondary-100: #f1f5f9;
     --color-secondary-200: #e2e8f0;
@@ -36,14 +32,12 @@
     --color-secondary-800: #1e293b;
     --color-secondary-900: #0f172a;
 
-    /* Status Colors */
     --color-success: #22c55e;
     --color-warning: #f59e0b;
     --color-danger: #ef4444;
     --color-info: #3b82f6;
 }
 
-/* Base Styles */
 @layer base {
     body {
         background-color: var(--color-secondary-50);
@@ -53,7 +47,6 @@
     }
 }
 
-/* Component Styles */
 @layer components {
     .card {
         background-color: white;
@@ -78,7 +71,6 @@
         border-color: var(--color-primary-200);
     }
 
-    /* Button Styles */
     .btn {
         display: inline-flex;
         align-items: center;
@@ -145,7 +137,6 @@
         font-size: 0.75rem;
     }
 
-    /* Badge Styles */
     .badge {
         display: inline-flex;
         align-items: center;
@@ -180,7 +171,6 @@
         color: var(--color-secondary-700);
     }
 
-    /* Form Styles */
     .form-label {
         display: block;
         font-size: 0.875rem;
@@ -244,7 +234,6 @@
         box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
-    /* Stats Card */
     .stats-card {
         background-color: white;
         border-radius: 0.75rem;
@@ -290,7 +279,6 @@
         margin-top: 0.5rem;
     }
 
-    /* Navigation */
     .sidebar-link {
         display: flex;
         align-items: center;
@@ -330,7 +318,6 @@
         color: var(--color-primary-600);
     }
 
-    /* Table */
     .data-table {
         width: 100%;
         font-size: 0.875rem;
@@ -364,7 +351,6 @@
         background-color: var(--color-secondary-50);
     }
 
-    /* Modal */
     .modal-overlay {
         position: fixed;
         inset: 0;
@@ -403,7 +389,6 @@
         gap: 0.75rem;
     }
 
-    /* Empty State */
     .empty-state {
         display: flex;
         flex-direction: column;
@@ -433,7 +418,6 @@
     }
 }
 
-/* Animations */
 @keyframes fadeIn {
     from {
         opacity: 0;

@@ -31,10 +31,8 @@ class PetugasInputController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        // Upload bukti foto
         $fotoPath = $request->file('bukti_foto')->store('bukti-pembayaran', 'public');
 
-        // Create pembayaran
         $pembayaran = Pembayaran::create([
             'tagihan_id' => $validated['tagihan_id'],
             'petugas_id' => auth()->id(),
@@ -46,7 +44,6 @@ class PetugasInputController extends Controller
             'status' => 'menunggu_admin',
         ]);
 
-        // Update tagihan status
         Tagihan::where('id', $validated['tagihan_id'])
             ->update(['status' => 'menunggu_verifikasi']);
 

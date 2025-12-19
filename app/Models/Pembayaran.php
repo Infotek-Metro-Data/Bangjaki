@@ -54,4 +54,14 @@ class Pembayaran extends Model
     {
         return $query->where('status', 'menunggu_admin');
     }
+
+    public function scopeByPetugas($query, $petugasId)
+    {
+        return $query->where('petugas_id', $petugasId);
+    }
+
+    public function scopeDisetujui($query)
+    {
+        return $query->where('status', 'disetujui');
+    }
 }

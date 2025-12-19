@@ -10,8 +10,6 @@ class PelangganHomeController extends Controller
 {
     public function index()
     {
-        // For now, we'll get pelanggan from session or query param
-        // In production, this would come from authenticated pelanggan
         $pelangganId = session('pelanggan_id') ?? request('id');
         
         if (!$pelangganId) {
@@ -28,10 +26,10 @@ class PelangganHomeController extends Controller
         $statusBulanIni = $tagihanBulanIni?->status === 'lunas' ? 'paid' : 'unpaid';
         $nextDueDate = $tagihanBulanIni?->jatuh_tempo ?? now()->setDay($pelanggan->tanggal_registrasi->day);
 
-        // Get assigned petugas (placeholder)
         $petugas = (object)[
             'name' => 'Petugas Wilayah ' . $pelanggan->wilayah,
             'phone' => '081234567890',
+            'status' => 'aktif',
         ];
 
         return view('pelanggan.home', compact('pelanggan', 'statusBulanIni', 'nextDueDate', 'petugas'));

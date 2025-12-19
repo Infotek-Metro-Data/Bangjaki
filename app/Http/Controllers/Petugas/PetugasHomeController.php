@@ -11,10 +11,8 @@ class PetugasHomeController extends Controller
     {
         $petugas = auth()->user();
         
-        // Get today's date for filtering
         $today = now();
         
-        // Get tagihan based on filter
         $filter = request('filter', 'semua');
         
         $query = Tagihan::with('pelanggan')
@@ -32,7 +30,6 @@ class PetugasHomeController extends Controller
 
         $tagihan = $query->get();
 
-        // Stats
         $jatuhTempo = Tagihan::jatuhTempoHariIni()->belumBayar()->count();
         $sudahBayar = Tagihan::whereDate('updated_at', $today)->where('status', 'lunas')->count();
         $menunggak = Tagihan::menunggak()->count();

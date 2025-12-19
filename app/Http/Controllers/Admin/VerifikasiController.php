@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Pembayaran;
+use Illuminate\Http\Request;
+
+class VerifikasiController extends Controller
+{
+    public function index(Request $request)
+    {
+        $pendingPayments = Pembayaran::with(['tagihan.pelanggan', 'petugas'])
+            ->where('status', 'menunggu_admin')
+            ->latest()
+            ->get();
+        
+        $currentPayment = null;
+        
+        if ($request->has('show')) {
+            $currentPayment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])
+                ->find($request->show);
+        } elseif ($pendingPayments->isNotEmpty()) {
+            $currentPayment = $pendingPayments->first();
+        }
+        
+        return view('admin.verifikasi.index', compact('pendingPayments', 'currentPayment'));
+    }
+
+    public function show($id)
+    {
+        return redirect()->route('admin.verifikasi.index', ['show' => $id]);
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $payment = Pembayaran::findOrFail($id);
+        
+        $payment->update([
+            'status' => 'disetujui',
+            'diverifikasi_oleh' => auth()->id(),
+            'diverifikasi_pada' => now(),
+        ]);
+        
+        $payment->tagihan->update(['status' => 'lunas']);
+        
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Pembayaran disetujui!']);
+        }
+        
+        return back()->with('success', 'Pembayaran berhasil disetujui!');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $payment = Pembayaran::findOrFail($id);
+        
+        $payment->update([
+            'status' => 'ditolak',
+            'diverifikasi_oleh' => auth()->id(),
+            'diverifikasi_pada' => now(),
+            'catatan' => $request->input('alasan', 'Ditolak oleh admin'),
+        ]);
+        
+        $payment->tagihan->update(['status' => 'belum_bayar']);
+        
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Pembayaran ditolak!']);
+        }
+        
+        return back()->with('success', 'Pembayaran ditolak!');
+    }
+}

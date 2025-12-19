@@ -15,8 +15,14 @@ class Setoran extends Model
         'petugas_id',
         'total_tagihan_sistem',
         'total_uang_diterima',
-        'selisih',
+        'tanggal_setor',
+        'status',
+        'catatan_admin',
         'dikonfirmasi_oleh',
+    ];
+
+    protected $casts = [
+        'tanggal_setor' => 'date',
     ];
 
     public function petugas()
@@ -25,6 +31,11 @@ class Setoran extends Model
     }
 
     public function admin()
+    {
+        return $this->belongsTo(Pengguna::class, 'dikonfirmasi_oleh');
+    }
+
+    public function konfirmator()
     {
         return $this->belongsTo(Pengguna::class, 'dikonfirmasi_oleh');
     }

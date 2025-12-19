@@ -10,17 +10,11 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * Show login form
-     */
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    /**
-     * Handle login request
-     */
     public function login(Request $request)
     {
         $request->validate([
@@ -46,7 +40,6 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect based on role
         return match($pengguna->peran) {
             'admin' => redirect()->intended(route('admin.dashboard')),
             'petugas' => redirect()->intended(route('petugas.home')),
@@ -54,9 +47,6 @@ class AuthController extends Controller
         };
     }
 
-    /**
-     * Handle logout request
-     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -67,17 +57,11 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    /**
-     * Show register form (optional - for admin to create users)
-     */
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle register request
-     */
     public function register(Request $request)
     {
         $request->validate([
