@@ -21,6 +21,24 @@ class PetugasSaldoController extends Controller
         $totalSaldo = $transaksi->sum('jumlah_bayar');
         $totalTransaksi = $transaksi->count();
 
-        return view('petugas.saldo', compact('transaksi', 'totalSaldo', 'totalTransaksi'));
+        $sudahDisetor = Pembayaran::byPetugas($petugas->id)
+            ->disetujui()
+            ->whereNotNull('setoran_id')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('jumlah_bayar');
+
+        $pending = Pembayaran::byPetugas($petugas->id)
+            ->where('status', 'menunggu_admin')
+            ->count();
+
+        return view('petugas.saldo.index', compact(
+            'transaksi', 
+            'totalSaldo', 
+            'totalTransaksi',
+            'sudahDisetor',
+            'pending'
+        ));
     }
 }
+

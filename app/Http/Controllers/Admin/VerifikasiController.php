@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
+use App\Notifications\PembayaranStatusNotification;
 use Illuminate\Http\Request;
 
 class VerifikasiController extends Controller
@@ -19,8 +20,11 @@ class VerifikasiController extends Controller
         
         if ($request->has('show')) {
             $currentPayment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])
+                ->where('status', 'menunggu_admin')
                 ->find($request->show);
-        } elseif ($pendingPayments->isNotEmpty()) {
+        }
+        
+        if (!$currentPayment && $pendingPayments->isNotEmpty()) {
             $currentPayment = $pendingPayments->first();
         }
         
@@ -34,7 +38,7 @@ class VerifikasiController extends Controller
 
     public function approve(Request $request, $id)
     {
-        $payment = Pembayaran::findOrFail($id);
+        $payment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])->findOrFail($id);
         
         $payment->update([
             'status' => 'disetujui',
@@ -43,6 +47,14 @@ class VerifikasiController extends Controller
         ]);
         
         $payment->tagihan->update(['status' => 'lunas']);
+        
+        if ($payment->petugas) {
+            $payment->petugas->notify(new PembayaranStatusNotification(
+                'disetujui',
+                $payment->tagihan->pelanggan->nama ?? 'Pelanggan',
+                $payment->jumlah_bayar
+            ));
+        }
         
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'Pembayaran disetujui!']);
@@ -53,16 +65,26 @@ class VerifikasiController extends Controller
 
     public function reject(Request $request, $id)
     {
-        $payment = Pembayaran::findOrFail($id);
+        $payment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])->findOrFail($id);
+        $alasan = $request->input('alasan', 'Ditolak oleh admin');
         
         $payment->update([
             'status' => 'ditolak',
             'diverifikasi_oleh' => auth()->id(),
             'diverifikasi_pada' => now(),
-            'catatan' => $request->input('alasan', 'Ditolak oleh admin'),
+            'catatan' => $alasan,
         ]);
         
         $payment->tagihan->update(['status' => 'belum_bayar']);
+        
+        if ($payment->petugas) {
+            $payment->petugas->notify(new PembayaranStatusNotification(
+                'ditolak',
+                $payment->tagihan->pelanggan->nama ?? 'Pelanggan',
+                $payment->jumlah_bayar,
+                $alasan
+            ));
+        }
         
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'Pembayaran ditolak!']);

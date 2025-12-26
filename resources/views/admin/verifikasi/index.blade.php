@@ -22,16 +22,27 @@
                         </div>
                         @if (isset($currentPayment))
                             <div class="flex gap-2">
-                                <button
-                                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors hover:border-gray-300">
+                                @php
+                                    $currentIndex = $pendingPayments->search(fn($p) => $p->id === $currentPayment->id);
+                                    $prevPayment =
+                                        $currentIndex !== false && $currentIndex > 0
+                                            ? $pendingPayments->get($currentIndex - 1)
+                                            : null;
+                                    $nextPayment =
+                                        $currentIndex !== false && $currentIndex < $pendingPayments->count() - 1
+                                            ? $pendingPayments->get($currentIndex + 1)
+                                            : null;
+                                @endphp
+                                <a href="{{ $prevPayment ? route('admin.verifikasi.show', $prevPayment->id) : '#' }}"
+                                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors hover:border-gray-300 {{ !$prevPayment ? 'opacity-50 pointer-events-none' : '' }}">
                                     <span class="material-symbols-outlined text-[18px]">arrow_back</span>
                                     <span class="hidden sm:inline">Sebelumnya</span>
-                                </button>
-                                <button
-                                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors hover:border-gray-300">
+                                </a>
+                                <a href="{{ $nextPayment ? route('admin.verifikasi.show', $nextPayment->id) : '#' }}"
+                                    class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium transition-colors hover:border-gray-300 {{ !$nextPayment ? 'opacity-50 pointer-events-none' : '' }}">
                                     <span class="hidden sm:inline">Selanjutnya</span>
                                     <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                                </button>
+                                </a>
                             </div>
                         @endif
                     </div>
@@ -48,6 +59,12 @@
                                     <h3 class="font-bold text-slate-900 flex items-center gap-2">
                                         <span class="material-symbols-outlined text-gray-500">image</span>
                                         Bukti Pembayaran
+                                        @if ($currentPayment->bukti_foto && is_array($currentPayment->bukti_foto))
+                                            <span
+                                                class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                                {{ count($currentPayment->bukti_foto) }} foto
+                                            </span>
+                                        @endif
                                     </h3>
                                     <div class="flex gap-1">
                                         <button onclick="rotateImage()"
@@ -70,12 +87,44 @@
                             </div>
                             <div
                                 class="relative bg-slate-900/5 flex-1 min-h-[300px] md:min-h-[450px] flex items-center justify-center p-4 overflow-hidden">
-                                @if ($currentPayment->foto_bukti)
-                                    <img id="paymentProofImg"
-                                        src="{{ asset('storage/' . $currentPayment->foto_bukti) }}"
-                                        alt="Bukti Pembayaran"
-                                        class="max-w-full max-h-full object-contain shadow-lg rounded-lg transition-transform duration-300"
-                                        style="transform: scale(1) rotate(0deg);">
+                                @php
+                                    $fotos = $currentPayment->bukti_foto;
+                                    if (!is_array($fotos)) {
+                                        $fotos = $fotos ? [$fotos] : [];
+                                    }
+                                @endphp
+
+                                @if (count($fotos) > 0)
+                                    <div class="relative w-full h-full flex items-center justify-center">
+                                        @foreach ($fotos as $index => $foto)
+                                            <img id="paymentProofImg-{{ $index }}"
+                                                src="{{ asset('storage/' . $foto) }}"
+                                                alt="Bukti Pembayaran {{ $index + 1 }}"
+                                                class="max-w-full max-h-full object-contain shadow-lg rounded-lg transition-transform duration-300 {{ $index === 0 ? '' : 'hidden' }}"
+                                                style="transform: scale(1) rotate(0deg);"
+                                                data-index="{{ $index }}">
+                                        @endforeach
+
+                                        @if (count($fotos) > 1)
+                                            <button onclick="prevImage()"
+                                                class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-orange-500 transition-all">
+                                                <span class="material-symbols-outlined">chevron_left</span>
+                                            </button>
+                                            <button onclick="nextImage()"
+                                                class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-orange-500 transition-all">
+                                                <span class="material-symbols-outlined">chevron_right</span>
+                                            </button>
+
+                                            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                                                @foreach ($fotos as $index => $foto)
+                                                    <button onclick="goToImage({{ $index }})"
+                                                        class="w-2.5 h-2.5 rounded-full transition-all {{ $index === 0 ? 'bg-orange-500 w-6' : 'bg-white/70 hover:bg-white' }}"
+                                                        id="dot-{{ $index }}">
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
                                 @else
                                     <div class="text-center">
                                         <span
@@ -176,6 +225,19 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                @if ($currentPayment->catatan)
+                                    <div class="pt-4 border-t border-gray-100">
+                                        <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-2">
+                                            <span
+                                                class="material-symbols-outlined text-[14px] align-middle mr-1">comment</span>
+                                            Catatan dari Petugas
+                                        </p>
+                                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                                            <p class="text-sm text-slate-700">{{ $currentPayment->catatan }}</p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
@@ -317,6 +379,9 @@
     <script>
         let currentRotation = 0;
         let currentScale = 1;
+        let currentImageIndex = 0;
+        const totalImages = {{ isset($fotos) ? count($fotos) : 0 }};
+        const imageUrls = @json(isset($fotos) ? array_map(fn($f) => asset('storage/' . $f), $fotos) : []);
 
         function rotateImage() {
             currentRotation = (currentRotation - 90) % 360;
@@ -329,16 +394,55 @@
         }
 
         function updateImageTransform() {
-            const img = document.getElementById('paymentProofImg');
+            const img = document.getElementById('paymentProofImg-' + currentImageIndex);
             if (img) {
                 img.style.transform = `scale(${currentScale}) rotate(${currentRotation}deg)`;
             }
         }
 
+        function goToImage(index) {
+            if (index < 0 || index >= totalImages) return;
+
+            // Hide current image
+            const currentImg = document.getElementById('paymentProofImg-' + currentImageIndex);
+            if (currentImg) currentImg.classList.add('hidden');
+
+            // Reset transform for old image
+            if (currentImg) currentImg.style.transform = 'scale(1) rotate(0deg)';
+
+            // Show new image
+            const newImg = document.getElementById('paymentProofImg-' + index);
+            if (newImg) newImg.classList.remove('hidden');
+
+            // Update dots
+            const oldDot = document.getElementById('dot-' + currentImageIndex);
+            const newDot = document.getElementById('dot-' + index);
+            if (oldDot) {
+                oldDot.classList.remove('bg-orange-500', 'w-6');
+                oldDot.classList.add('bg-white/70');
+            }
+            if (newDot) {
+                newDot.classList.remove('bg-white/70');
+                newDot.classList.add('bg-orange-500', 'w-6');
+            }
+
+            currentImageIndex = index;
+            currentRotation = 0;
+            currentScale = 1;
+        }
+
+        function nextImage() {
+            goToImage((currentImageIndex + 1) % totalImages);
+        }
+
+        function prevImage() {
+            goToImage((currentImageIndex - 1 + totalImages) % totalImages);
+        }
+
         function openFullImage() {
-            @if (isset($currentPayment) && $currentPayment->foto_bukti)
-                window.open('{{ asset('storage/' . $currentPayment->foto_bukti) }}', '_blank');
-            @endif
+            if (imageUrls.length > 0) {
+                window.open(imageUrls[currentImageIndex], '_blank');
+            }
         }
 
         function approvePayment(id) {

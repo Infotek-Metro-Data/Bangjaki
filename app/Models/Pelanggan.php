@@ -45,4 +45,9 @@ class Pelanggan extends Model
     {
         return $this->hasMany(Tagihan::class);
     }
+
+    public function scopeAktif($query)
+    {
+        return $query->where('status', 'aktif');
+    }
 }

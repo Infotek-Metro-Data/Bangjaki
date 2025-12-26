@@ -43,6 +43,7 @@ class PetugasController extends Controller
             'password' => 'required|min:8',
             'telepon' => 'required|string|max:20',
             'nomor_kendaraan' => 'nullable|string|max:20',
+            'wilayah' => 'nullable|string|max:100',
             'status' => 'required|in:aktif,istirahat,nonaktif',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -75,6 +76,7 @@ class PetugasController extends Controller
             'email' => 'required|email|unique:pengguna,email,' . $id,
             'telepon' => 'required|string|max:20',
             'nomor_kendaraan' => 'nullable|string|max:20',
+            'wilayah' => 'nullable|string|max:100',
             'status' => 'required|in:aktif,istirahat,nonaktif',
         ]);
         

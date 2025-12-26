@@ -31,8 +31,29 @@ class Tagihan extends Model
         return $this->belongsTo(Pelanggan::class);
     }
 
+    public function getTotalTagihanAttribute()
+    {
+        return $this->jumlah_tagihan;
+    }
+
     public function pembayaran()
     {
         return $this->hasMany(Pembayaran::class);
+    }
+
+    public function scopeBelumBayar($query)
+    {
+        return $query->where('status', 'belum_bayar');
+    }
+
+    public function scopeJatuhTempoHariIni($query)
+    {
+        return $query->whereDate('jatuh_tempo', now()->toDateString());
+    }
+
+    public function scopeMenunggak($query)
+    {
+        return $query->where('status', 'belum_bayar')
+                     ->whereDate('jatuh_tempo', '<', now()->toDateString());
     }
 }

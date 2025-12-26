@@ -38,6 +38,32 @@ class PelangganController extends Controller
         return view('admin.pelanggan.index', compact('pelanggan', 'jenisPelanggan', 'wilayahList'));
     }
 
+    public function show($id)
+    {
+        $pelanggan = Pelanggan::with(['jenisPelanggan'])->findOrFail($id);
+        
+        $tagihan = \App\Models\Tagihan::with(['pembayaran.petugas'])
+            ->where('pelanggan_id', $id)
+            ->latest()
+            ->paginate(10);
+        
+        $totalTagihan = \App\Models\Tagihan::where('pelanggan_id', $id)->count();
+        $tagihanLunas = \App\Models\Tagihan::where('pelanggan_id', $id)->where('status', 'lunas')->count();
+        $tagihanBelumBayar = \App\Models\Tagihan::where('pelanggan_id', $id)->where('status', 'belum_bayar')->count();
+        $totalPembayaran = \App\Models\Pembayaran::whereHas('tagihan', fn($q) => $q->where('pelanggan_id', $id))
+            ->where('status', 'disetujui')
+            ->sum('jumlah_bayar');
+        
+        return view('admin.pelanggan.show', compact(
+            'pelanggan', 
+            'tagihan', 
+            'totalTagihan', 
+            'tagihanLunas', 
+            'tagihanBelumBayar',
+            'totalPembayaran'
+        ));
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

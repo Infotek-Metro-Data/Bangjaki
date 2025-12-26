@@ -79,6 +79,24 @@
                     </div>
 
                     <div class="flex flex-col gap-1.5">
+                        <label class="text-sm font-semibold text-gray-700">Wilayah Tugas</label>
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">location_on</span>
+                            <select name="wilayah" id="inputWilayah"
+                                class="w-full appearance-none pl-10 pr-8 py-2.5 rounded-lg bg-white border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none text-sm text-slate-900 cursor-pointer">
+                                <option value="">Semua Wilayah</option>
+                                @foreach (\App\Models\Wilayah::orderBy('nama')->get() as $w)
+                                    <option value="{{ $w->nama }}">{{ $w->nama }}</option>
+                                @endforeach
+                            </select>
+                            <span
+                                class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">expand_more</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Kosongkan untuk akses semua wilayah</p>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
                         <label class="text-sm font-semibold text-gray-700">Status</label>
                         <div class="relative">
                             <select name="status" id="inputStatus"
@@ -115,11 +133,18 @@
                         <p class="text-gray-500 max-w-lg">Kelola data petugas lapangan, pantau status operasional, dan
                             atur penugasan dalam satu tampilan.</p>
                     </div>
-                    <button onclick="openCreatePetugas()"
-                        class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg shadow-orange-500/25 flex items-center gap-2 transition-all active:scale-95 shrink-0 transform hover:-translate-y-0.5">
-                        <span class="material-symbols-outlined text-[20px]">add</span>
-                        <span>Tambah Petugas</span>
-                    </button>
+                    <div class="flex gap-3">
+                        <a href="{{ route('admin.export.petugas', request()->query()) }}"
+                            class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg shadow-green-500/25 flex items-center gap-2 transition-all active:scale-95 shrink-0 transform hover:-translate-y-0.5">
+                            <span class="material-symbols-outlined text-[20px]">download</span>
+                            <span>Export</span>
+                        </a>
+                        <button onclick="openCreatePetugas()"
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg shadow-orange-500/25 flex items-center gap-2 transition-all active:scale-95 shrink-0 transform hover:-translate-y-0.5">
+                            <span class="material-symbols-outlined text-[20px]">add</span>
+                            <span>Tambah Petugas</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

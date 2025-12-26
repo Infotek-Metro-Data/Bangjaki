@@ -36,7 +36,6 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* Custom Orange Scrollbar */
         .sidebar-scroll::-webkit-scrollbar {
             width: 5px;
         }
@@ -123,7 +122,6 @@
             height: 2.5rem;
         }
 
-        /* Flyout Menu - Fixed Position to bypass overflow */
         .flyout-menu {
             position: fixed;
             left: var(--sidebar-collapsed-width);
@@ -187,17 +185,6 @@
                 transform: translateX(0);
             }
 
-            .mobile-sidebar-backdrop {
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease;
-            }
-
-            .mobile-sidebar-open .mobile-sidebar-backdrop {
-                opacity: 1;
-                pointer-events: auto;
-            }
-
             .flyout-menu {
                 display: none !important;
             }
@@ -208,18 +195,21 @@
 <body class="bg-gray-100 text-gray-800 antialiased overflow-hidden">
     <div id="app" class="flex h-screen w-full" x-data="{
         sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+        mobileSidebarOpen: false,
         masterOpen: {{ request()->routeIs('admin.pelanggan.*') || request()->routeIs('admin.petugas.*') ? 'true' : 'false' }},
         transaksiOpen: {{ request()->routeIs('admin.tagihan.*') || request()->routeIs('admin.verifikasi.*') || request()->routeIs('admin.settlement.*') ? 'true' : 'false' }},
         masterFlyoutTop: 0,
         transaksiFlyoutTop: 0,
         toggleSidebar() {
             if (window.innerWidth < 768) {
-                this.$el.classList.toggle('mobile-sidebar-open');
+                this.mobileSidebarOpen = !this.mobileSidebarOpen;
             } else {
                 this.sidebarCollapsed = !this.sidebarCollapsed;
-                this.$el.classList.toggle('sidebar-collapsed', this.sidebarCollapsed);
                 localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
             }
+        },
+        closeMobileSidebar() {
+            this.mobileSidebarOpen = false;
         },
         updateFlyoutPosition(event, type) {
             const rect = event.currentTarget.getBoundingClientRect();
@@ -230,9 +220,12 @@
             }
         }
     }"
-        :class="{ 'sidebar-collapsed': sidebarCollapsed }">
-        <div class="mobile-sidebar-backdrop fixed inset-0 bg-black/50 z-40 md:hidden"
-            @click="$el.parentElement.classList.remove('mobile-sidebar-open')">
+        :class="{ 'sidebar-collapsed': sidebarCollapsed, 'mobile-sidebar-open': mobileSidebarOpen }">
+        <div class="mobile-sidebar-backdrop fixed inset-0 bg-black/50 z-40 md:hidden" @click="closeMobileSidebar()"
+            x-show="mobileSidebarOpen" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0">
         </div>
 
         <aside class="sidebar flex flex-col h-full bg-white border-r border-gray-100 shrink-0 shadow-sm z-30">
@@ -247,7 +240,6 @@
                     </div>
 
                     <nav class="flex-1 px-3 py-4">
-                        <!-- Dashboard - Single Link -->
                         <a href="{{ route('admin.dashboard') }}"
                             class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl mb-2 {{ request()->routeIs('admin.dashboard') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-600' }} transition-all duration-200 group">
                             <span
@@ -314,7 +306,6 @@
                         </div>
 
                         <div class="relative mb-1">
-                            <!-- Expanded: Accordion Header -->
                             <div x-show="!sidebarCollapsed" x-cloak>
                                 <button @click="transaksiOpen = !transaksiOpen"
                                     class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 mt-2"
@@ -336,11 +327,17 @@
                                         <span class="sidebar-text text-sm font-medium whitespace-nowrap">Tagihan</span>
                                     </a>
                                     <a href="{{ route('admin.verifikasi.index') }}"
-                                        class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.verifikasi.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-600' }} transition-all duration-200 group">
+                                        class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.verifikasi.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-600' }} transition-all duration-200 group relative">
                                         <span
                                             class="material-symbols-outlined text-[20px] {{ request()->routeIs('admin.verifikasi.*') ? '' : 'text-gray-400 group-hover:text-orange-500' }}">verified</span>
                                         <span
                                             class="sidebar-text text-sm font-medium whitespace-nowrap">Verifikasi</span>
+                                        @if ($pendingVerifikasi > 0)
+                                            <span
+                                                class="sidebar-text absolute right-2 top-1/2 -translate-y-1/2 min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center {{ request()->routeIs('admin.verifikasi.*') ? 'bg-white text-orange-600' : 'bg-red-500 text-white animate-pulse' }}">
+                                                {{ $pendingVerifikasi > 99 ? '99+' : $pendingVerifikasi }}
+                                            </span>
+                                        @endif
                                     </a>
                                     <a href="{{ route('admin.settlement.index') }}"
                                         class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.settlement.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-600' }} transition-all duration-200 group">
@@ -355,8 +352,12 @@
                             <div x-show="sidebarCollapsed" x-cloak class="flyout-trigger"
                                 @mouseenter="updateFlyoutPosition($event, 'transaksi')">
                                 <button
-                                    class="menu-parent-icon w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.tagihan.*') || request()->routeIs('admin.verifikasi.*') || request()->routeIs('admin.settlement.*') ? 'bg-orange-100 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600' }}">
+                                    class="menu-parent-icon w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 relative {{ request()->routeIs('admin.tagihan.*') || request()->routeIs('admin.verifikasi.*') || request()->routeIs('admin.settlement.*') ? 'bg-orange-100 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600' }}">
                                     <span class="material-symbols-outlined text-[20px]">swap_horiz</span>
+                                    @if ($pendingVerifikasi > 0)
+                                        <span
+                                            class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
+                                    @endif
                                 </button>
                                 <div class="flyout-menu bg-white rounded-xl shadow-xl border border-gray-100 py-2 px-1"
                                     :style="'top: ' + transaksiFlyoutTop + 'px'">
@@ -369,9 +370,15 @@
                                         <span class="text-sm font-medium">Tagihan</span>
                                     </a>
                                     <a href="{{ route('admin.verifikasi.index') }}"
-                                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg {{ request()->routeIs('admin.verifikasi.*') ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-500' }} transition-all">
+                                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg {{ request()->routeIs('admin.verifikasi.*') ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-500' }} transition-all relative">
                                         <span class="material-symbols-outlined text-[18px]">verified</span>
                                         <span class="text-sm font-medium">Verifikasi</span>
+                                        @if ($pendingVerifikasi > 0)
+                                            <span
+                                                class="ml-auto min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center {{ request()->routeIs('admin.verifikasi.*') ? 'bg-white text-orange-600' : 'bg-red-500 text-white' }}">
+                                                {{ $pendingVerifikasi > 99 ? '99+' : $pendingVerifikasi }}
+                                            </span>
+                                        @endif
                                     </a>
                                     <a href="{{ route('admin.settlement.index') }}"
                                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg {{ request()->routeIs('admin.settlement.*') ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-500' }} transition-all">

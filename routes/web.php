@@ -9,6 +9,11 @@ use App\Http\Controllers\Admin\SettlementController;
 use App\Http\Controllers\Admin\TagihanController;
 use App\Http\Controllers\Admin\VerifikasiController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Petugas\PetugasHomeController;
+use App\Http\Controllers\Petugas\PetugasInputController;
+use App\Http\Controllers\Petugas\PetugasProfileController;
+use App\Http\Controllers\Petugas\PetugasSaldoController;
+use App\Http\Controllers\Petugas\PetugasTagihanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -38,6 +43,7 @@ Route::prefix('admin')
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
         Route::get('/pelanggan', [PelangganController::class, 'index'])->name('pelanggan.index');
+        Route::get('/pelanggan/{id}', [PelangganController::class, 'show'])->name('pelanggan.show');
         Route::post('/pelanggan', [PelangganController::class, 'store'])->name('pelanggan.store');
         Route::put('/pelanggan/{id}', [PelangganController::class, 'update'])->name('pelanggan.update');
         Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
@@ -71,13 +77,34 @@ Route::prefix('admin')
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
         Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+        
+        Route::get('/export/pelanggan', [\App\Http\Controllers\Admin\ExportController::class, 'pelanggan'])->name('export.pelanggan');
+        Route::get('/export/tagihan', [\App\Http\Controllers\Admin\ExportController::class, 'tagihan'])->name('export.tagihan');
+        Route::get('/export/petugas', [\App\Http\Controllers\Admin\ExportController::class, 'petugas'])->name('export.petugas');
     });
 
 Route::prefix('petugas')
     ->name('petugas.')
     ->middleware(['auth', 'role:petugas'])
     ->group(function () {
-        Route::get('/', function () {
-            return view('petugas.home');
-        })->name('home');
+        Route::get('/', [PetugasHomeController::class, 'index'])->name('home');
+        
+        Route::get('/tagihan', [PetugasTagihanController::class, 'index'])->name('tagihan');
+        
+        Route::get('/input', [PetugasInputController::class, 'create'])->name('input');
+        Route::post('/input', [PetugasInputController::class, 'store'])->name('input.store');
+        
+        Route::get('/saldo', [PetugasSaldoController::class, 'index'])->name('saldo');
+        
+        Route::get('/riwayat', [\App\Http\Controllers\Petugas\PetugasRiwayatController::class, 'index'])->name('riwayat');
+        
+        Route::get('/profile', [PetugasProfileController::class, 'index'])->name('profile');
+        Route::post('/profile', [PetugasProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/password', [PetugasProfileController::class, 'updatePassword'])->name('profile.password');
+        
+        Route::post('/notifications/read', function() {
+            auth()->user()->unreadNotifications->markAsRead();
+            return back();
+        })->name('notifications.read');
     });
+

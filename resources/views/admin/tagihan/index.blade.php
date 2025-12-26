@@ -18,6 +18,11 @@
                             <p class="text-gray-500">Kelola tagihan bulanan dan generate invoice untuk pelanggan.</p>
                         </div>
                         <div class="flex gap-3">
+                            <a href="{{ route('admin.export.tagihan', request()->query()) }}"
+                                class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg shadow-green-500/25 transition-all transform hover:-translate-y-0.5">
+                                <span class="material-symbols-outlined text-[20px]">download</span>
+                                Export
+                            </a>
                             <button onclick="confirmGenerate()"
                                 class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/25 transition-all transform hover:-translate-y-0.5">
                                 <span class="material-symbols-outlined text-[20px]">add_circle</span>

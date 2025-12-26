@@ -17,7 +17,9 @@ class Pembayaran extends Model
         'jumlah_bayar',
         'metode',
         'tanggal_bayar',
-        'foto_bukti',
+        'bukti_foto',
+        'lokasi_lat',
+        'lokasi_long',
         'status',
         'catatan',
         'diverifikasi_oleh',
@@ -28,6 +30,7 @@ class Pembayaran extends Model
     protected $casts = [
         'tanggal_bayar' => 'date',
         'diverifikasi_pada' => 'datetime',
+        'bukti_foto' => 'array',
     ];
 
     public function tagihan()

@@ -27,20 +27,24 @@ class PetugasInputController extends Controller
             'tagihan_id' => 'required|exists:tagihan,id',
             'nominal' => 'required|numeric|min:0',
             'metode' => 'required|in:tunai,transfer',
-            'bukti_foto' => 'required|image|max:5120',
-            'catatan' => 'nullable|string',
+            'bukti_foto' => 'required|array|min:1|max:5',
+            'bukti_foto.*' => 'image|max:5120',
+            'catatan' => 'nullable|string|max:500',
         ]);
 
-        $fotoPath = $request->file('bukti_foto')->store('bukti-pembayaran', 'public');
+        $fotoPaths = [];
+        foreach ($request->file('bukti_foto') as $foto) {
+            $fotoPaths[] = $foto->store('bukti-pembayaran', 'public');
+        }
 
         $pembayaran = Pembayaran::create([
             'tagihan_id' => $validated['tagihan_id'],
             'petugas_id' => auth()->id(),
             'jumlah_bayar' => $validated['nominal'],
             'metode' => $validated['metode'],
-            'bukti_foto' => $fotoPath,
-            'lokasi_lat' => $request->latitude,
-            'lokasi_long' => $request->longitude,
+            'bukti_foto' => $fotoPaths,
+            'catatan' => $validated['catatan'] ?? null,
+            'tanggal_bayar' => now(),
             'status' => 'menunggu_admin',
         ]);
 

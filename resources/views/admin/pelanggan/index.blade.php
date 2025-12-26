@@ -124,6 +124,11 @@
                         <p class="text-gray-500 text-sm">Kelola data pelanggan dan tagihan iuran sampah.</p>
                     </div>
                     <div class="flex gap-2 md:gap-3">
+                        <a href="{{ route('admin.export.pelanggan', request()->query()) }}"
+                            class="flex items-center justify-center gap-2 rounded-lg h-9 md:h-10 px-3 md:px-4 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold shadow-sm shadow-green-500/30 transition-all">
+                            <span class="material-symbols-outlined text-[18px]">download</span>
+                            <span class="hidden sm:inline">Export</span>
+                        </a>
                         <button onclick="openSlideOver()"
                             class="flex items-center justify-center gap-2 rounded-lg h-9 md:h-10 px-3 md:px-4 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold shadow-sm shadow-orange-500/30 transition-all">
                             <span class="material-symbols-outlined text-[18px]">add</span>
@@ -379,7 +384,7 @@
 
         document.getElementById('dropdownView').onclick = () => {
             dropdown.classList.add('hidden');
-            showDetailPelanggan(currentPelanggan);
+            window.location.href = `/admin/pelanggan/${currentPelanggan.id}`;
         };
 
         document.getElementById('dropdownEdit').onclick = () => {
@@ -444,11 +449,12 @@
             });
         }
         async function showEditPelanggan(pelanggan) {
-            toggleMenu(pelanggan.id);
-
-
             const jenisPelangganOptions = @json($jenisPelanggan ?? []).map(jenis =>
                 `<option value="${jenis.id}" ${pelanggan.jenis_pelanggan_id == jenis.id ? 'selected' : ''}>${jenis.nama_paket} - Rp ${Number(jenis.harga_dasar).toLocaleString('id-ID')}</option>`
+            ).join('');
+
+            const wilayahOptions = @json($wilayahList ?? []).map(w =>
+                `<option value="${w.nama}" ${pelanggan.wilayah === w.nama ? 'selected' : ''}>${w.nama}</option>`
             ).join('');
 
             const {
@@ -476,9 +482,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Wilayah</label>
                             <select id="swal-wilayah" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
-                                <option value="Wilayah A" ${pelanggan.wilayah === 'Wilayah A' ? 'selected' : ''}>Wilayah A</option>
-                                <option value="Wilayah B" ${pelanggan.wilayah === 'Wilayah B' ? 'selected' : ''}>Wilayah B</option>
-                                <option value="Wilayah C" ${pelanggan.wilayah === 'Wilayah C' ? 'selected' : ''}>Wilayah C</option>
+                                ${wilayahOptions}
                             </select>
                         </div>
                         <div>
