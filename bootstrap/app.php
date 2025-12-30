@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,11 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
         
-        // Configure where to redirect guests when they try to access protected routes
         $middleware->redirectGuestsTo('/login');
         
-        // Configure where to redirect authenticated users when they try to access guest-only routes
         $middleware->redirectUsersTo(function ($request) {
+            if (Auth::guard('pelanggan')->check()) {
+                return '/pelanggan';
+            }
+            
             $user = $request->user();
             if (!$user) return '/login';
             
@@ -31,6 +34,4 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
     })->create();
-

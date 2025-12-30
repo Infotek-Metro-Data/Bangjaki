@@ -74,10 +74,15 @@ class PelangganController extends Controller
             'wilayah' => 'required|string|max:100',
             'email' => 'nullable|email|unique:pelanggan,email',
             'iuran_khusus' => 'nullable|numeric|min:0',
+            'password' => 'nullable|string|min:8',
         ]);
         
         $validated['tanggal_registrasi'] = now();
         $validated['status'] = 'aktif';
+        
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
         
         Pelanggan::create($validated);
         
