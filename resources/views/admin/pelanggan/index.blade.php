@@ -97,6 +97,23 @@
                             class="w-full rounded-lg border border-gray-200 bg-gray-50 text-slate-900 text-sm px-3 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                     </div>
                 </div>
+                <div class="flex flex-col gap-4">
+                    <h3 class="text-slate-900 text-sm font-bold border-b border-gray-100 pb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-500 text-[18px]">lock</span>
+                        Akun Pelanggan <span class="text-xs font-normal text-gray-400">(Opsional)</span>
+                    </h3>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+                        <span class="material-symbols-outlined text-[16px] align-middle mr-1">info</span>
+                        Isi password jika ingin pelanggan dapat login ke portal pelanggan.
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-medium text-gray-700">Password</label>
+                        <input type="password" name="password" minlength="8"
+                            class="w-full rounded-lg border border-gray-200 bg-gray-50 text-slate-900 text-sm px-3 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-transparent placeholder:text-gray-400"
+                            placeholder="Min. 8 karakter">
+                        <p class="text-xs text-gray-400">Kosongkan jika tidak ingin membuat akun</p>
+                    </div>
+                </div>
             </div>
             <div class="p-4 md:p-6 border-t border-gray-100 bg-gray-50 sticky bottom-0 z-10">
                 <div class="flex gap-3">
@@ -580,7 +597,7 @@
         }
 
         function confirmDelete(id, nama) {
-            toggleMenu(id);
+            dropdown.classList.add('hidden');
 
             Swal.fire({
                 title: 'Hapus Pelanggan?',

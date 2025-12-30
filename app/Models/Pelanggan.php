@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Pelanggan extends Model
+class Pelanggan extends Authenticatable
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Notifiable;
 
     protected $table = 'pelanggan';
 
@@ -16,6 +17,7 @@ class Pelanggan extends Model
         'jenis_pelanggan_id',
         'nama',
         'email',
+        'password',
         'alamat_lengkap',
         'wilayah',
         'telepon',
@@ -26,9 +28,15 @@ class Pelanggan extends Model
         'status',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected $casts = [
         'tanggal_registrasi' => 'date',
         'iuran_khusus' => 'decimal:2',
+        'password' => 'hashed',
     ];
 
     public function getHargaAttribute()

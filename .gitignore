@@ -19,6 +19,9 @@
 /storage/*.key
 /storage/pail
 /vendor
+/database/*.sqlite
+/storage/app/public/*
+!/storage/app/public/.gitkeep
 Homestead.json
 Homestead.yaml
 Thumbs.db

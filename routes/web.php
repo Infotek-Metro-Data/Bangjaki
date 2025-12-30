@@ -9,14 +9,22 @@ use App\Http\Controllers\Admin\SettlementController;
 use App\Http\Controllers\Admin\TagihanController;
 use App\Http\Controllers\Admin\VerifikasiController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboardController;
+use App\Http\Controllers\Pelanggan\TagihanController as PelangganTagihanController;
+use App\Http\Controllers\Pelanggan\RiwayatController as PelangganRiwayatController;
+use App\Http\Controllers\Pelanggan\ProfileController as PelangganProfileController;
 use App\Http\Controllers\Petugas\PetugasHomeController;
 use App\Http\Controllers\Petugas\PetugasInputController;
 use App\Http\Controllers\Petugas\PetugasProfileController;
 use App\Http\Controllers\Petugas\PetugasSaldoController;
 use App\Http\Controllers\Petugas\PetugasTagihanController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (Auth::guard('pelanggan')->check()) {
+        return redirect()->route('pelanggan.dashboard');
+    }
     if (auth()->check()) {
         return match(auth()->user()->peran) {
             'admin' => redirect()->route('admin.dashboard'),
@@ -106,5 +114,17 @@ Route::prefix('petugas')
             auth()->user()->unreadNotifications->markAsRead();
             return back();
         })->name('notifications.read');
+    });
+
+Route::prefix('pelanggan')
+    ->name('pelanggan.')
+    ->middleware(['role:pelanggan'])
+    ->group(function () {
+        Route::get('/', [PelangganDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/tagihan', [PelangganTagihanController::class, 'index'])->name('tagihan');
+        Route::get('/riwayat', [PelangganRiwayatController::class, 'index'])->name('riwayat');
+        Route::get('/profile', [PelangganProfileController::class, 'index'])->name('profile');
+        Route::post('/profile', [PelangganProfileController::class, 'update'])->name('profile.update');
+        Route::post('/profile/password', [PelangganProfileController::class, 'updatePassword'])->name('profile.password');
     });
 

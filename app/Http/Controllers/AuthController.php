@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pelanggan;
 use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,32 +25,68 @@ class AuthController extends Controller
 
         $pengguna = Pengguna::where('email', $request->email)->first();
 
-        if (!$pengguna || !Hash::check($request->password, $pengguna->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Email atau password salah.'],
-            ]);
+        if ($pengguna) {
+            if (!Hash::check($request->password, $pengguna->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['Email atau password salah.'],
+                ]);
+            }
+
+            if ($pengguna->status !== 'aktif') {
+                throw ValidationException::withMessages([
+                    'email' => ['Akun Anda tidak aktif. Hubungi admin.'],
+                ]);
+            }
+
+            Auth::login($pengguna, $request->boolean('remember'));
+            $request->session()->regenerate();
+
+            return match($pengguna->peran) {
+                'admin' => redirect()->intended(route('admin.dashboard')),
+                'petugas' => redirect()->intended(route('petugas.home')),
+                default => redirect()->intended('/'),
+            };
         }
 
-        if ($pengguna->status !== 'aktif') {
-            throw ValidationException::withMessages([
-                'email' => ['Akun Anda tidak aktif. Hubungi admin.'],
-            ]);
+        $pelanggan = Pelanggan::where('email', $request->email)->first();
+
+        if ($pelanggan) {
+            if (!$pelanggan->password) {
+                throw ValidationException::withMessages([
+                    'email' => ['Akun belum diaktifkan. Hubungi admin untuk mendapatkan password.'],
+                ]);
+            }
+
+            if (!Hash::check($request->password, $pelanggan->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['Email atau password salah.'],
+                ]);
+            }
+
+            if ($pelanggan->status !== 'aktif') {
+                throw ValidationException::withMessages([
+                    'email' => ['Akun Anda tidak aktif. Hubungi admin.'],
+                ]);
+            }
+
+            Auth::guard('pelanggan')->login($pelanggan, $request->boolean('remember'));
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('pelanggan.dashboard'));
         }
 
-        Auth::login($pengguna, $request->boolean('remember'));
-
-        $request->session()->regenerate();
-
-        return match($pengguna->peran) {
-            'admin' => redirect()->intended(route('admin.dashboard')),
-            'petugas' => redirect()->intended(route('petugas.home')),
-            default => redirect()->intended('/'),
-        };
+        throw ValidationException::withMessages([
+            'email' => ['Email atau password salah.'],
+        ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        if (Auth::guard('pelanggan')->check()) {
+            Auth::guard('pelanggan')->logout();
+        } else {
+            Auth::logout();
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
