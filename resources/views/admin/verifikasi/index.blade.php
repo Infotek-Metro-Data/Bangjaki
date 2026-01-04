@@ -181,7 +181,7 @@
                                                 <span class="material-symbols-outlined text-[16px]">payments</span>
                                             </div>
                                             <p class="text-sm font-medium text-slate-900">
-                                                {{ ucfirst($currentPayment->metode ?? 'Tunai') }}</p>
+                                                {{ $currentPayment->metode?->nama ?? 'Tunai' }}</p>
                                         </div>
                                     </div>
                                     <div>
@@ -332,13 +332,18 @@
                                         <td class="px-4 md:px-6 py-4">
                                             @php
                                                 $statusClass = match ($payment->status) {
-                                                    'disetujui' => 'bg-green-100 text-green-700 border-green-200',
+                                                    'disetujui',
+                                                    'disetor'
+                                                        => 'bg-green-100 text-green-700 border-green-200',
                                                     'ditolak' => 'bg-red-100 text-red-700 border-red-200',
+                                                    'dikumpulkan' => 'bg-blue-100 text-blue-700 border-blue-200',
                                                     default => 'bg-amber-100 text-amber-700 border-amber-200',
                                                 };
                                                 $statusLabel = match ($payment->status) {
                                                     'disetujui' => 'Disetujui',
+                                                    'disetor' => 'Disetor',
                                                     'ditolak' => 'Ditolak',
+                                                    'dikumpulkan' => 'Dikumpulkan',
                                                     default => 'Pending',
                                                 };
                                             @endphp
@@ -348,9 +353,9 @@
                                             </span>
                                         </td>
                                         <td class="px-4 md:px-6 py-4 text-right">
-                                            @if ($payment->status === 'menunggu_admin')
+                                            @if ($payment->status === 'dikumpulkan')
                                                 <a href="{{ route('admin.verifikasi.show', $payment->id) }}"
-                                                    class="text-orange-500 font-bold text-sm hover:text-orange-600 hover:underline">Verifikasi</a>
+                                                    class="text-orange-500 font-bold text-sm hover:text-orange-600 hover:underline">Review</a>
                                             @else
                                                 <button onclick="showPaymentDetail({{ json_encode($payment) }})"
                                                     class="text-gray-500 text-sm hover:text-orange-500 transition-colors">Detail</button>

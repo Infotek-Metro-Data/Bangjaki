@@ -169,7 +169,7 @@
                     <span class="material-symbols-outlined text-gray-400 text-[20px]">event</span>
                     <div>
                         <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Terdaftar Sejak</p>
-                        <p class="text-slate-900">{{ $pelanggan->tanggal_registrasi?->format('d F Y') ?? '-' }}</p>
+                        <p class="text-slate-900">{{ $pelanggan->created_at?->format('d F Y') ?? '-' }}</p>
                     </div>
                 </div>
             </div>

@@ -43,16 +43,16 @@ class PetugasHomeController extends Controller
         });
 
         $jatuhTempo = $baseQuery()->jatuhTempoHariIni()->belumBayar()->count();
-        $sudahBayar = $baseQuery()->whereDate('updated_at', $today)->where('status', 'lunas')->count();
+        $sudahBayar = $baseQuery()->lunas()->whereDate('updated_at', $today)->count();
         $menunggak = $baseQuery()->menunggak()->count();
 
-        $transaksiHariIni = Pembayaran::byPetugas($petugas->id)
-            ->disetujui()
+        $saldoDiTangan = Pembayaran::byPetugas($petugas->id)
+            ->byStatusKode('dikumpulkan')
             ->whereNull('setoran_id')
             ->get();
 
-        $totalSaldo = $transaksiHariIni->sum('jumlah_bayar');
-        $totalTransaksi = $transaksiHariIni->count();
+        $totalSaldo = $saldoDiTangan->sum('jumlah_bayar');
+        $totalTransaksi = $saldoDiTangan->count();
 
         return view('petugas.home', compact(
             'tagihan', 

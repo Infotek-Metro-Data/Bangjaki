@@ -64,6 +64,11 @@ Route::prefix('admin')
         Route::put('/petugas/{id}', [PetugasController::class, 'update'])->name('petugas.update');
         Route::delete('/petugas/{id}', [PetugasController::class, 'destroy'])->name('petugas.destroy');
         
+        Route::get('/admins', [\App\Http\Controllers\Admin\AdminManagementController::class, 'index'])->name('admins.index');
+        Route::post('/admins', [\App\Http\Controllers\Admin\AdminManagementController::class, 'store'])->name('admins.store');
+        Route::put('/admins/{id}', [\App\Http\Controllers\Admin\AdminManagementController::class, 'update'])->name('admins.update');
+        Route::delete('/admins/{id}', [\App\Http\Controllers\Admin\AdminManagementController::class, 'destroy'])->name('admins.destroy');
+        
         Route::get('/verifikasi', [VerifikasiController::class, 'index'])->name('verifikasi.index');
         Route::get('/verifikasi/{id}', [VerifikasiController::class, 'show'])->name('verifikasi.show');
         Route::post('/verifikasi/{id}/approve', [VerifikasiController::class, 'approve'])->name('verifikasi.approve');

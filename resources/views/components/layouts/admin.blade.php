@@ -196,7 +196,7 @@
     <div id="app" class="flex h-screen w-full" x-data="{
         sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
         mobileSidebarOpen: false,
-        masterOpen: {{ request()->routeIs('admin.pelanggan.*') || request()->routeIs('admin.petugas.*') ? 'true' : 'false' }},
+        masterOpen: {{ request()->routeIs('admin.pelanggan.*') || request()->routeIs('admin.petugas.*') || request()->routeIs('admin.admins.*') ? 'true' : 'false' }},
         transaksiOpen: {{ request()->routeIs('admin.tagihan.*') || request()->routeIs('admin.verifikasi.*') || request()->routeIs('admin.settlement.*') ? 'true' : 'false' }},
         masterFlyoutTop: 0,
         transaksiFlyoutTop: 0,
@@ -277,13 +277,19 @@
                                             class="material-symbols-outlined text-[20px] {{ request()->routeIs('admin.petugas.*') ? '' : 'text-gray-400 group-hover:text-orange-500' }}">badge</span>
                                         <span class="sidebar-text text-sm font-medium whitespace-nowrap">Petugas</span>
                                     </a>
+                                    <a href="{{ route('admin.admins.index') }}"
+                                        class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl {{ request()->routeIs('admin.admins.*') ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-600' }} transition-all duration-200 group">
+                                        <span
+                                            class="material-symbols-outlined text-[20px] {{ request()->routeIs('admin.admins.*') ? '' : 'text-gray-400 group-hover:text-orange-500' }}">admin_panel_settings</span>
+                                        <span class="sidebar-text text-sm font-medium whitespace-nowrap">Admin</span>
+                                    </a>
                                 </div>
                             </div>
 
                             <div x-show="sidebarCollapsed" x-cloak class="flyout-trigger"
                                 @mouseenter="updateFlyoutPosition($event, 'master')">
                                 <button
-                                    class="menu-parent-icon w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.pelanggan.*') || request()->routeIs('admin.petugas.*') ? 'bg-orange-100 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600' }}">
+                                    class="menu-parent-icon w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 {{ request()->routeIs('admin.pelanggan.*') || request()->routeIs('admin.petugas.*') || request()->routeIs('admin.admins.*') ? 'bg-orange-100 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600' }}">
                                     <span class="material-symbols-outlined text-[20px]">folder_shared</span>
                                 </button>
                                 <div class="flyout-menu bg-white rounded-xl shadow-xl border border-gray-100 py-2 px-1"
@@ -300,6 +306,11 @@
                                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg {{ request()->routeIs('admin.petugas.*') ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-500' }} transition-all">
                                         <span class="material-symbols-outlined text-[18px]">badge</span>
                                         <span class="text-sm font-medium">Petugas</span>
+                                    </a>
+                                    <a href="{{ route('admin.admins.index') }}"
+                                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg {{ request()->routeIs('admin.admins.*') ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-orange-500' }} transition-all">
+                                        <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+                                        <span class="text-sm font-medium">Admin</span>
                                     </a>
                                 </div>
                             </div>

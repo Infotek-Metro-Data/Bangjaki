@@ -17,7 +17,7 @@ class Tagihan extends Model
         'periode_selesai',
         'jumlah_tagihan',
         'jatuh_tempo',
-        'status',
+        'status_id',
     ];
 
     protected $casts = [
@@ -31,19 +31,34 @@ class Tagihan extends Model
         return $this->belongsTo(Pelanggan::class);
     }
 
-    public function getTotalTagihanAttribute()
-    {
-        return $this->jumlah_tagihan;
-    }
-
     public function pembayaran()
     {
         return $this->hasMany(Pembayaran::class);
     }
 
+    public function statusTagihan()
+    {
+        return $this->belongsTo(StatusTagihan::class, 'status_id');
+    }
+
+    public function getTotalTagihanAttribute()
+    {
+        return $this->jumlah_tagihan;
+    }
+
+    public function getStatusAttribute()
+    {
+        return $this->statusTagihan?->kode;
+    }
+
     public function scopeBelumBayar($query)
     {
-        return $query->where('status', 'belum_bayar');
+        return $query->whereHas('statusTagihan', fn($q) => $q->where('kode', 'belum_bayar'));
+    }
+
+    public function scopeLunas($query)
+    {
+        return $query->whereHas('statusTagihan', fn($q) => $q->where('kode', 'lunas'));
     }
 
     public function scopeJatuhTempoHariIni($query)
@@ -53,7 +68,12 @@ class Tagihan extends Model
 
     public function scopeMenunggak($query)
     {
-        return $query->where('status', 'belum_bayar')
+        return $query->whereHas('statusTagihan', fn($q) => $q->where('kode', 'belum_bayar'))
                      ->whereDate('jatuh_tempo', '<', now()->toDateString());
+    }
+
+    public function scopeByStatusKode($query, string $kode)
+    {
+        return $query->whereHas('statusTagihan', fn($q) => $q->where('kode', $kode));
     }
 }

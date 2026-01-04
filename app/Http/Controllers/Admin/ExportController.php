@@ -106,7 +106,7 @@ class ExportController extends Controller
             $sheet->setCellValue("G{$row}", $p->jenisPelanggan->nama_paket ?? '-');
             $sheet->setCellValue("H{$row}", $p->iuran_khusus ?? $p->jenisPelanggan->harga_dasar ?? 0);
             $sheet->setCellValue("I{$row}", ucfirst($p->status));
-            $sheet->setCellValue("J{$row}", $p->tanggal_registrasi?->format('d/m/Y') ?? '-');
+            $sheet->setCellValue("J{$row}", $p->created_at?->format('d/m/Y') ?? '-');
             $row++;
         }
         

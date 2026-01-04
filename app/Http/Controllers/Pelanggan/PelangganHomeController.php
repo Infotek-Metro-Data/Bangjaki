@@ -24,7 +24,7 @@ class PelangganHomeController extends Controller
             ->first();
 
         $statusBulanIni = $tagihanBulanIni?->status === 'lunas' ? 'paid' : 'unpaid';
-        $nextDueDate = $tagihanBulanIni?->jatuh_tempo ?? now()->setDay($pelanggan->tanggal_registrasi->day);
+        $nextDueDate = $tagihanBulanIni?->jatuh_tempo ?? now()->setDay($pelanggan->created_at->day);
 
         $petugas = (object)[
             'name' => 'Petugas Wilayah ' . $pelanggan->wilayah,

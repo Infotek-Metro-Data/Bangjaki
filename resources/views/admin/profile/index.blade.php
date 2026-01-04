@@ -58,7 +58,7 @@
                             </button>
 
                             <input type="file" name="foto" id="fotoInput" class="hidden" accept="image/*"
-                                onchange="previewImage(this)">
+                                onchange="if(validateFileSize(this, 2)) previewImage(this)">
                         </div>
                         <span class="text-sm font-medium text-slate-900">{{ ucfirst($user->peran) }}</span>
                     </div>
@@ -285,5 +285,22 @@
                     Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
                 });
         });
+
+        function validateFileSize(input, maxSizeMB) {
+            if (input.files && input.files[0]) {
+                const fileSizeMB = input.files[0].size / (1024 * 1024);
+                if (fileSizeMB > maxSizeMB) {
+                    Swal.fire({
+                        title: 'Ukuran File Terlalu Besar!',
+                        text: `File yang dipilih berukuran ${fileSizeMB.toFixed(2)} MB. Maksimal ukuran file adalah ${maxSizeMB} MB.`,
+                        icon: 'error',
+                        confirmButtonColor: '#f97316'
+                    });
+                    input.value = '';
+                    return false;
+                }
+            }
+            return true;
+        }
     </script>
 </x-layouts.admin>
