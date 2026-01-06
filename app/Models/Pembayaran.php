@@ -15,12 +15,10 @@ class Pembayaran extends Model
         'tagihan_id',
         'petugas_id',
         'jumlah_bayar',
-        'metode',
+        'metode_id',
+        'status_id',
         'tanggal_bayar',
         'bukti_foto',
-        'lokasi_lat',
-        'lokasi_long',
-        'status',
         'catatan',
         'diverifikasi_oleh',
         'diverifikasi_pada',
@@ -53,9 +51,29 @@ class Pembayaran extends Model
         return $this->belongsTo(Setoran::class);
     }
 
+    public function metode()
+    {
+        return $this->belongsTo(MetodePembayaran::class, 'metode_id');
+    }
+
+    public function statusPembayaran()
+    {
+        return $this->belongsTo(StatusPembayaran::class, 'status_id');
+    }
+
+    public function getStatusAttribute()
+    {
+        return $this->statusPembayaran?->kode;
+    }
+
+    public function getMetodeNamaAttribute()
+    {
+        return $this->metode?->nama;
+    }
+
     public function scopeMenunggAdmin($query)
     {
-        return $query->where('status', 'menunggu_admin');
+        return $query->whereHas('statusPembayaran', fn($q) => $q->where('kode', 'menunggu_admin'));
     }
 
     public function scopeByPetugas($query, $petugasId)
@@ -65,6 +83,11 @@ class Pembayaran extends Model
 
     public function scopeDisetujui($query)
     {
-        return $query->where('status', 'disetujui');
+        return $query->whereHas('statusPembayaran', fn($q) => $q->where('kode', 'disetujui'));
+    }
+
+    public function scopeByStatusKode($query, string $kode)
+    {
+        return $query->whereHas('statusPembayaran', fn($q) => $q->where('kode', $kode));
     }
 }

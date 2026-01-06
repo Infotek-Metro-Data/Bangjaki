@@ -83,8 +83,8 @@ class TagihanController extends Controller
         foreach ($pelangganAktif as $pelanggan) {
             $hargaFull = $pelanggan->iuran_khusus ?? $pelanggan->jenisPelanggan->harga_dasar ?? 50000;
             
-            if ($pelanggan->tanggal_registrasi && $pelanggan->tanggal_registrasi >= $periodeAwal) {
-                $tanggalDaftar = Carbon::parse($pelanggan->tanggal_registrasi);
+            if ($pelanggan->created_at && $pelanggan->created_at >= $periodeAwal) {
+                $tanggalDaftar = Carbon::parse($pelanggan->created_at);
                 $sisaHari = $periodeAkhir->day - $tanggalDaftar->day + 1;
                 $totalHari = $periodeAkhir->day;
                 $nominal = max(0, round($hargaFull * ($sisaHari / $totalHari)));

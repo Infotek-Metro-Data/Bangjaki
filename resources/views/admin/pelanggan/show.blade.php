@@ -85,7 +85,7 @@
                                         <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                                             Registrasi</p>
                                         <p class="text-slate-900">
-                                            {{ $pelanggan->tanggal_registrasi?->format('d F Y') ?? '-' }}</p>
+                                            {{ $pelanggan->created_at?->format('d F Y') ?? '-' }}</p>
                                     </div>
                                 </div>
                             </div>

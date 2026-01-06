@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
+use App\Models\MetodePembayaran;
 use App\Models\Pembayaran;
+use App\Models\StatusPembayaran;
+use App\Models\StatusTagihan;
 use App\Models\Tagihan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class PetugasInputController extends Controller
 {
@@ -37,21 +39,25 @@ class PetugasInputController extends Controller
             $fotoPaths[] = $foto->store('bukti-pembayaran', 'public');
         }
 
+        $metode = MetodePembayaran::where('kode', $validated['metode'])->first();
+        $statusDikumpulkan = StatusPembayaran::where('kode', 'dikumpulkan')->first();
+        $statusMenungguVerifikasi = StatusTagihan::where('kode', 'menunggu_verifikasi')->first();
+
         $pembayaran = Pembayaran::create([
             'tagihan_id' => $validated['tagihan_id'],
             'petugas_id' => auth()->id(),
             'jumlah_bayar' => $validated['nominal'],
-            'metode' => $validated['metode'],
+            'metode_id' => $metode->id,
             'bukti_foto' => $fotoPaths,
             'catatan' => $validated['catatan'] ?? null,
             'tanggal_bayar' => now(),
-            'status' => 'menunggu_admin',
+            'status_id' => $statusDikumpulkan->id,
         ]);
 
         Tagihan::where('id', $validated['tagihan_id'])
-            ->update(['status' => 'menunggu_verifikasi']);
+            ->update(['status_id' => $statusMenungguVerifikasi->id]);
 
         return redirect()->route('petugas.home')
-            ->with('success', 'Pembayaran berhasil diinput. Menunggu verifikasi admin.');
+            ->with('success', 'Pembayaran berhasil diinput. Uang dikumpulkan di saldo Anda.');
     }
 }

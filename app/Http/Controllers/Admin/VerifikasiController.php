@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
+use App\Models\StatusPembayaran;
+use App\Models\StatusTagihan;
 use App\Notifications\PembayaranStatusNotification;
 use Illuminate\Http\Request;
 
@@ -11,21 +13,17 @@ class VerifikasiController extends Controller
 {
     public function index(Request $request)
     {
-        $pendingPayments = Pembayaran::with(['tagihan.pelanggan', 'petugas'])
-            ->where('status', 'menunggu_admin')
+        $pendingPayments = Pembayaran::with(['tagihan.pelanggan', 'petugas', 'metode'])
+            ->whereHas('statusPembayaran', fn($q) => $q->where('kode', 'dikumpulkan'))
             ->latest()
             ->get();
         
         $currentPayment = null;
         
         if ($request->has('show')) {
-            $currentPayment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])
-                ->where('status', 'menunggu_admin')
+            $currentPayment = Pembayaran::with(['tagihan.pelanggan', 'petugas', 'metode'])
+                ->whereHas('statusPembayaran', fn($q) => $q->where('kode', 'dikumpulkan'))
                 ->find($request->show);
-        }
-        
-        if (!$currentPayment && $pendingPayments->isNotEmpty()) {
-            $currentPayment = $pendingPayments->first();
         }
         
         return view('admin.verifikasi.index', compact('pendingPayments', 'currentPayment'));
@@ -40,13 +38,16 @@ class VerifikasiController extends Controller
     {
         $payment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])->findOrFail($id);
         
+        $statusDisetujui = StatusPembayaran::where('kode', 'disetujui')->first();
+        $statusLunas = StatusTagihan::where('kode', 'lunas')->first();
+        
         $payment->update([
-            'status' => 'disetujui',
+            'status_id' => $statusDisetujui->id,
             'diverifikasi_oleh' => auth()->id(),
             'diverifikasi_pada' => now(),
         ]);
         
-        $payment->tagihan->update(['status' => 'lunas']);
+        $payment->tagihan->update(['status_id' => $statusLunas->id]);
         
         if ($payment->petugas) {
             $payment->petugas->notify(new PembayaranStatusNotification(
@@ -60,7 +61,7 @@ class VerifikasiController extends Controller
             return response()->json(['success' => true, 'message' => 'Pembayaran disetujui!']);
         }
         
-        return back()->with('success', 'Pembayaran berhasil disetujui!');
+        return redirect()->route('admin.verifikasi.index')->with('success', 'Pembayaran berhasil disetujui!');
     }
 
     public function reject(Request $request, $id)
@@ -68,14 +69,17 @@ class VerifikasiController extends Controller
         $payment = Pembayaran::with(['tagihan.pelanggan', 'petugas'])->findOrFail($id);
         $alasan = $request->input('alasan', 'Ditolak oleh admin');
         
+        $statusDitolak = StatusPembayaran::where('kode', 'ditolak')->first();
+        $statusBelumBayar = StatusTagihan::where('kode', 'belum_bayar')->first();
+        
         $payment->update([
-            'status' => 'ditolak',
+            'status_id' => $statusDitolak->id,
             'diverifikasi_oleh' => auth()->id(),
             'diverifikasi_pada' => now(),
             'catatan' => $alasan,
         ]);
         
-        $payment->tagihan->update(['status' => 'belum_bayar']);
+        $payment->tagihan->update(['status_id' => $statusBelumBayar->id]);
         
         if ($payment->petugas) {
             $payment->petugas->notify(new PembayaranStatusNotification(
@@ -90,6 +94,6 @@ class VerifikasiController extends Controller
             return response()->json(['success' => true, 'message' => 'Pembayaran ditolak!']);
         }
         
-        return back()->with('success', 'Pembayaran ditolak!');
+        return redirect()->route('admin.verifikasi.index')->with('success', 'Pembayaran ditolak!');
     }
 }

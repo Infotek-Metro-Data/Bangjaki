@@ -1,4 +1,5 @@
 <x-layouts.petugas title="Input Pembayaran">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <div class="px-4 py-5 flex flex-col gap-5">
         <div class="flex flex-wrap gap-2 items-center">
             <a class="text-slate-500 text-sm font-medium hover:text-orange-600 hover:underline"
@@ -154,13 +155,34 @@
 
     <script>
         let selectedFiles = [];
+        const MAX_FILE_SIZE_MB = 5;
 
         document.getElementById('foto-input').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             const maxFiles = 5;
 
             if (files.length > maxFiles) {
-                alert('Maksimal ' + maxFiles + ' foto yang dapat diupload');
+                Swal.fire({
+                    title: 'Terlalu Banyak File!',
+                    text: `Maksimal ${maxFiles} foto yang dapat diupload.`,
+                    icon: 'warning',
+                    confirmButtonColor: '#f97316'
+                });
+                e.target.value = '';
+                return;
+            }
+
+            // Check file sizes
+            const oversizedFiles = files.filter(file => (file.size / (1024 * 1024)) > MAX_FILE_SIZE_MB);
+            if (oversizedFiles.length > 0) {
+                const fileNames = oversizedFiles.map(f => `${f.name} (${(f.size / (1024 * 1024)).toFixed(2)} MB)`)
+                    .join(', ');
+                Swal.fire({
+                    title: 'Ukuran File Terlalu Besar!',
+                    html: `File berikut melebihi batas ${MAX_FILE_SIZE_MB} MB:<br><small>${fileNames}</small>`,
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
                 e.target.value = '';
                 return;
             }

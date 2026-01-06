@@ -8,7 +8,7 @@
             </button>
         </div>
         <form id="formTambahPelanggan" method="POST" action="{{ route('admin.pelanggan.store') }}"
-            class="flex flex-col flex-1">
+            enctype="multipart/form-data" class="flex flex-col flex-1">
             @csrf
             <div class="p-4 md:p-6 flex flex-col gap-6 flex-1 overflow-y-auto">
                 <div class="flex flex-col gap-4">
@@ -70,6 +70,20 @@
                 </div>
                 <div class="flex flex-col gap-4">
                     <h3 class="text-slate-900 text-sm font-bold border-b border-gray-100 pb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-500 text-[18px]">home</span>
+                        Foto Rumah
+                    </h3>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-medium text-gray-700">Foto Rumah Pelanggan <span
+                                class="text-red-500">*</span></label>
+                        <input type="file" name="foto_rumah" id="fotoRumahInput" accept="image/*" required
+                            onchange="validateFileSize(this, 5)"
+                            class="w-full rounded-lg border border-gray-200 bg-gray-50 text-slate-900 text-sm px-3 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                        <p class="text-xs text-gray-400">Format: JPG, PNG, WEBP. Maks 5MB</p>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <h3 class="text-slate-900 text-sm font-bold border-b border-gray-100 pb-2 flex items-center gap-2">
                         <span class="material-symbols-outlined text-orange-500 text-[18px]">payments</span>
                         Paket & Iuran
                     </h3>
@@ -89,12 +103,6 @@
                                     href="{{ route('admin.settings.index') }}" class="underline">Tambah di
                                     Pengaturan</a></p>
                         @endif
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <label class="text-xs font-medium text-gray-700">Tgl Registrasi <span
-                                class="text-red-500">*</span></label>
-                        <input type="date" name="tanggal_registrasi" value="{{ date('Y-m-d') }}" required
-                            class="w-full rounded-lg border border-gray-200 bg-gray-50 text-slate-900 text-sm px-3 py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                     </div>
                 </div>
                 <div class="flex flex-col gap-4">
@@ -738,5 +746,22 @@
                 draggable: true
             });
         @endif
+
+        function validateFileSize(input, maxSizeMB) {
+            if (input.files && input.files[0]) {
+                const fileSizeMB = input.files[0].size / (1024 * 1024);
+                if (fileSizeMB > maxSizeMB) {
+                    Swal.fire({
+                        title: 'Ukuran File Terlalu Besar!',
+                        text: `File yang dipilih berukuran ${fileSizeMB.toFixed(2)} MB. Maksimal ukuran file adalah ${maxSizeMB} MB.`,
+                        icon: 'error',
+                        confirmButtonColor: '#f97316'
+                    });
+                    input.value = '';
+                    return false;
+                }
+            }
+            return true;
+        }
     </script>
 </x-layouts.admin>

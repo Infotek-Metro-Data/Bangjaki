@@ -21,11 +21,9 @@ class Pelanggan extends Authenticatable
         'alamat_lengkap',
         'wilayah',
         'telepon',
-        'latitude',
-        'longitude',
         'iuran_khusus',
-        'tanggal_registrasi',
-        'status',
+        'status_id',
+        'foto_rumah',
     ];
 
     protected $hidden = [
@@ -34,15 +32,9 @@ class Pelanggan extends Authenticatable
     ];
 
     protected $casts = [
-        'tanggal_registrasi' => 'date',
         'iuran_khusus' => 'decimal:2',
         'password' => 'hashed',
     ];
-
-    public function getHargaAttribute()
-    {
-        return $this->iuran_khusus ?? $this->jenisPelanggan?->harga_dasar ?? 0;
-    }
 
     public function jenisPelanggan()
     {
@@ -54,8 +46,28 @@ class Pelanggan extends Authenticatable
         return $this->hasMany(Tagihan::class);
     }
 
+    public function statusPelanggan()
+    {
+        return $this->belongsTo(StatusPelanggan::class, 'status_id');
+    }
+
+    public function getHargaAttribute()
+    {
+        return $this->iuran_khusus ?? $this->jenisPelanggan?->harga_dasar ?? 0;
+    }
+
+    public function getStatusAttribute()
+    {
+        return $this->statusPelanggan?->kode;
+    }
+
     public function scopeAktif($query)
     {
-        return $query->where('status', 'aktif');
+        return $query->whereHas('statusPelanggan', fn($q) => $q->where('kode', 'aktif'));
+    }
+
+    public function scopeByStatusKode($query, string $kode)
+    {
+        return $query->whereHas('statusPelanggan', fn($q) => $q->where('kode', $kode));
     }
 }

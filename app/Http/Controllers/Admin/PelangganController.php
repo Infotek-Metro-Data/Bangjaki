@@ -75,13 +75,18 @@ class PelangganController extends Controller
             'email' => 'nullable|email|unique:pelanggan,email',
             'iuran_khusus' => 'nullable|numeric|min:0',
             'password' => 'nullable|string|min:8',
+            'foto_rumah' => 'required|image|max:5120',
         ]);
         
-        $validated['tanggal_registrasi'] = now();
-        $validated['status'] = 'aktif';
+        $statusAktif = \App\Models\StatusPelanggan::where('kode', 'aktif')->first();
+        $validated['status_id'] = $statusAktif->id;
         
         if (empty($validated['password'])) {
             unset($validated['password']);
+        }
+        
+        if ($request->hasFile('foto_rumah')) {
+            $validated['foto_rumah'] = $request->file('foto_rumah')->store('foto-rumah', 'public');
         }
         
         Pelanggan::create($validated);

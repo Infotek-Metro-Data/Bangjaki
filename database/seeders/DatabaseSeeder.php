@@ -6,41 +6,51 @@ use App\Models\JenisPelanggan;
 use App\Models\Pelanggan;
 use App\Models\Pengguna;
 use App\Models\Tagihan;
+use App\Models\PeranPengguna;
+use App\Models\StatusPengguna;
+use App\Models\StatusPelanggan;
+use App\Models\StatusTagihan;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    
     public function run(): void
     {
+        $peranAdmin = PeranPengguna::where('kode', 'admin')->first();
+        $peranPetugas = PeranPengguna::where('kode', 'petugas')->first();
+        $statusAktifPengguna = StatusPengguna::where('kode', 'aktif')->first();
+        $statusAktifPelanggan = StatusPelanggan::where('kode', 'aktif')->first();
+        $statusBelumBayar = StatusTagihan::where('kode', 'belum_bayar')->first();
+        $statusLunas = StatusTagihan::where('kode', 'lunas')->first();
+
         Pengguna::create([
             'nama' => 'Admin BangJaki',
             'email' => 'admin@bangjaki.com',
             'password' => Hash::make('password'),
-            'peran' => 'admin',
+            'peran_id' => $peranAdmin->id,
             'telepon' => '081234567890',
-            'status' => 'aktif',
+            'status_id' => $statusAktifPengguna->id,
         ]);
 
         $petugas1 = Pengguna::create([
             'nama' => 'Budi Collector',
             'email' => 'budi@bangjaki.com',
             'password' => Hash::make('password'),
-            'peran' => 'petugas',
+            'peran_id' => $peranPetugas->id,
             'nomor_kendaraan' => 'B 1234 ABC',
             'telepon' => '081234567891',
-            'status' => 'aktif',
+            'status_id' => $statusAktifPengguna->id,
         ]);
 
         $petugas2 = Pengguna::create([
             'nama' => 'Andi Collector',
             'email' => 'andi@bangjaki.com',
             'password' => Hash::make('password'),
-            'peran' => 'petugas',
+            'peran_id' => $peranPetugas->id,
             'nomor_kendaraan' => 'B 5678 DEF',
             'telepon' => '081234567892',
-            'status' => 'aktif',
+            'status_id' => $statusAktifPengguna->id,
         ]);
 
         $jenisRT = JenisPelanggan::create([
@@ -70,18 +80,23 @@ class DatabaseSeeder extends Seeder
             ['nama' => 'Dewi Lestari', 'alamat' => 'Perumahan Indah Blok A5', 'wilayah' => 'Wilayah A', 'jenis' => $jenisPremium, 'tanggal' => 25],
         ];
 
+        $tagihanStatuses = [$statusBelumBayar->id, $statusBelumBayar->id, $statusBelumBayar->id, $statusLunas->id];
+
         foreach ($pelangganData as $data) {
+            $createdAt = now()->subMonths(rand(1, 12))->setDay($data['tanggal']);
+            
             $pelanggan = Pelanggan::create([
                 'jenis_pelanggan_id' => $data['jenis']->id,
                 'nama' => $data['nama'],
                 'alamat_lengkap' => $data['alamat'],
                 'wilayah' => $data['wilayah'],
                 'telepon' => '08' . rand(1000000000, 9999999999),
-                'tanggal_registrasi' => now()->subMonths(rand(1, 12))->setDay($data['tanggal']),
-                'status' => 'aktif',
+                'status_id' => $statusAktifPelanggan->id,
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
             ]);
 
-            $tanggalReg = $pelanggan->tanggal_registrasi->day;
+            $tanggalReg = $pelanggan->created_at->day;
             $periodeAwal = now()->setDay($tanggalReg);
             
             if ($periodeAwal->isFuture()) {
@@ -93,7 +108,7 @@ class DatabaseSeeder extends Seeder
                 'periode_mulai' => $periodeAwal,
                 'periode_selesai' => $periodeAwal->copy()->addMonth()->subDay(),
                 'jumlah_tagihan' => $pelanggan->harga,
-                'status' => collect(['belum_bayar', 'belum_bayar', 'belum_bayar', 'lunas'])->random(),
+                'status_id' => collect($tagihanStatuses)->random(),
                 'jatuh_tempo' => $periodeAwal->copy()->addDays(7),
             ]);
         }
